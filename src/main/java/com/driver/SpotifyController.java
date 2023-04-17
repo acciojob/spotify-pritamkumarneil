@@ -51,7 +51,7 @@ public class SpotifyController {
     }
 
     @PostMapping("/add-playlist-on-name")
-    public String createPlaylistOnName(@RequestParam("mobile") String mobile, @RequestParam("title") String title,@RequestParam List<String> songTitles) throws Exception{
+    public String createPlaylistOnName(@RequestParam("mobile") String mobile, @RequestParam("title") String title,@RequestParam("songTitles") List<String> songTitles) throws Exception{
         //Create a playlist with given title and add all songs having the given titles in the database to that playlist
         //The creater of the playlist will be the given user and will also be the only listener at the time of playlist creation
         //If the user does not exist, throw "User does not exist" exception

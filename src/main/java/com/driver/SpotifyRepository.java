@@ -2,7 +2,6 @@ package com.driver;
 
 import java.util.*;
 
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -71,11 +70,11 @@ public class SpotifyRepository {
             artist=new Artist(artistName);
             artists.add(artist);
         }
-        //2. if artist found or not found creating album // update albumdb , artistAlbumMap
+        //2. if artist found or not found creating album // update albumDb , artistAlbumMap
         Album album=new Album();
         album.setTitle(title);
         album.setReleaseDate(new Date());
-        albums.add(album);// added to albumdb
+        albums.add(album);// added to albumDb
         if(!artistAlbumMap.containsKey(artist)){
             artistAlbumMap.put(artist,new ArrayList<>());
         }
@@ -119,9 +118,10 @@ public class SpotifyRepository {
 
     public Playlist createPlaylistOnLength(String mobile, String title, int length) throws Exception {
         //Create a playlist with given title and add all songs having the given length in the database to that playlist
-        //The creater of the playlist will be the given user and will also be the only listener at the time of playlist creation
+        //The creator of the playlist will be the given user and will also be the only listener at the time of playlist creation
         //If the user does not exist, throw "User does not exist" exception
-    //1. create playlist with give title first
+
+    //1. create playlist with given title first
         Playlist playlist=new Playlist(title);
 
     //2. Find the user with mobile -if not found throw exception//
@@ -143,18 +143,20 @@ public class SpotifyRepository {
                 songList.add(song);
             }
         }
-    //3. update createrPlaylistMap with given user and playList
+    //3. update creatorPlaylistMap with given user and playList
         creatorPlaylistMap.put(user,playlist);
 
-    //4. update playListListnerMap with the playList and user
+    //4. update playListListenerMap with the playList and user
         if(!playlistListenerMap.containsKey(playlist)){
             playlistListenerMap.put(playlist,new ArrayList<>());
         }
         playlistListenerMap.get(playlist).add(user);
 
     //5. Update playListSongMap// as it is new playlist so just put the list of song
+        //if(playlistSongMap.containsKey(playlist))
         playlistSongMap.put(playlist,songList);
 
+        // if everything went well then we can add playlist in playlist DB
         playlists.add(playlist);
 
 
@@ -163,10 +165,10 @@ public class SpotifyRepository {
 
     public Playlist createPlaylistOnName(String mobile, String title, List<String> songTitles) throws Exception {
         //Create a playlist with given title and add all songs having the given titles in the database to that playlist
-        //The creater of the playlist will be the given user and will also be the only listener at the time of playlist creation
+        //The creator of the playlist will be the given user and will also be the only listener at the time of playlist creation
         //If the user does not exist, throw "User does not exist" exception
 
-        //1. find the user first with mobile; make it creater of the playlist
+        //1. find the user first with mobile; make it creator of the playlist
             User user=null;
             boolean userFound=false;
             for(User user1: users){
@@ -193,7 +195,7 @@ public class SpotifyRepository {
             Playlist playlist=new Playlist(title);
             playlists.add(playlist);
 
-        //4. update playListListnerMap for current user
+        //4. update playListListenerMap for current user
             if(!playlistListenerMap.containsKey(playlist)){
                 playlistListenerMap.put(playlist,new ArrayList<>());
             }
@@ -219,12 +221,12 @@ public class SpotifyRepository {
 
     public Playlist findPlaylist(String mobile, String playlistTitle) throws Exception {
         //Find the playlist with given title and add user as listener of that playlist and update user accordingly
-        //If the user is creater or already a listener, do nothing
+        //If the user is creator or already a listener, do nothing
         //If the user does not exist, throw "User does not exist" exception
-        //If the playlist does not exists, throw "Playlist does not exist" exception
+        //If the playlist does not exist, throw "Playlist does not exist" exception
         // Return the playlist after updating
 
-        //1. find user with mobileno==mobile; // if user not found throw user doesnt exist
+        //1. find user with mobileNo==mobile; // if user not found throw user doesn't exist
             User user=null;
             boolean userFound=false;
             for(User user1: users){
@@ -246,14 +248,14 @@ public class SpotifyRepository {
                 }
             }
             if(!playlistFound)throw new Exception("Playlist does not exist");
-        //3. check if user is creater of playlist or a listner of playlist
-            // checking is user is creater
+        //3. check if user is creator of playlist or a listener of playlist
+            // checking is user is creator
             if(creatorPlaylistMap.get(user)==playlist){
                 return playlist;
             }
-            // checking if user is listner
-            for(User listner:playlistListenerMap.get(playlist)){
-                if(listner==user)return playlist;
+            // checking if user is listener
+            for(User listener:playlistListenerMap.get(playlist)){
+                if(listener==user)return playlist;
             }
         //4. return playList
             return playlist;
@@ -292,7 +294,7 @@ public class SpotifyRepository {
         if(!songFound) throw new Exception("Song does not exist");
 
     //3. check/update database songLikeMap(song,list<user>) // also if already liked by user then return
-        // if song is getting liked for the first time then it wont be there in the songLikeMap .. creating new list for that
+        // if song is getting liked for the first time then it won't be there in the songLikeMap// creating new list for that
         if(!songLikeMap.containsKey(song)){
             song.setLikes(song.getLikes()+1);
             songLikeMap.put(song,new ArrayList<>());
@@ -332,7 +334,12 @@ public class SpotifyRepository {
             }
             if(artistFound)break;
         }
-        artist.setLikes(artist.getLikes()+1);
+        try{
+            int likes=artist.getLikes()+1;
+            artist.setLikes(likes);
+        }catch (Exception e){
+            return song;
+        }
     //5. Return song after updating;
 
         return song;
